@@ -11,7 +11,7 @@ public class StageScript : MonoBehaviour
     public int map_y;   //yマス目はいくつか
 
     public GameObject ParentObject;     //親となるオブジェクト
-    [SerializeField] GameObject PieceObject;        //コマのオブジェクト
+    public GameObject PieceObject;        //コマのオブジェクト
     public Image PieceImage;       //コマのイメージ
     [SerializeField] GameObject MarkObject;        //マークのオブジェクト
 

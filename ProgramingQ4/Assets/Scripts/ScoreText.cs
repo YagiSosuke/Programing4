@@ -7,9 +7,11 @@ using UnityEngine.UI;
 
 public class ScoreText : MonoBehaviour
 {
+    int turnNum;    //残りターン数を示す
     int bsNum;  //黒の点数
     int wsNum;  //白の点数
 
+    [SerializeField] Text Turn;    //残り手数
     [SerializeField] Text BlackScore;    //黒の得点
     [SerializeField] Text WhiteScore;    //白の得点
 
@@ -28,6 +30,7 @@ public class ScoreText : MonoBehaviour
     //点数をカウントする
     public void CountScore()
     {
+        turnNum = 0;
         bsNum = 0;  //点数を0に設定
         wsNum = 0;  //点数を0に設定
 
@@ -46,9 +49,14 @@ public class ScoreText : MonoBehaviour
                 {
                     wsNum++;
                 }
+                else if(ReversScript.map[j, i] == 0)
+                {
+                    turnNum++;
+                }
             }
         }
 
+        Turn.text = turnNum.ToString();
         BlackScore.text = bsNum.ToString();
         WhiteScore.text = wsNum.ToString();
     }

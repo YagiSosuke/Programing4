@@ -16,7 +16,7 @@ public class ReversScript : MonoBehaviour
     public static int[,] map = new int[8,8];
     public static bool TurnEndF = false;        //ターンの終了を判定するフラグ
 
-    GameObject[,] MapObject = new GameObject[8,8];      //マップのゲームオブジェクト
+    public GameObject[,] MapObject = new GameObject[8,8];      //マップのゲームオブジェクト
     public static StageScript[,] MapScript = new StageScript[8,8];      //マップのスクリプト
 
     public static string WhoTurn;     //誰のターンか示す変数
@@ -194,7 +194,7 @@ public class ReversScript : MonoBehaviour
                     MapScript[x, i].PieceImage.color = MyColorC;
                 }
                 //ひっくり返せない敵色だった場合
-                else if (map[x, i] == EnemyColor)
+                else if (map[x, i] == EnemyColor2)
                 {
                 }
                 //自分の色だった場合
