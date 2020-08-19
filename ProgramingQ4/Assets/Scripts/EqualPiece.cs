@@ -8,23 +8,57 @@ using UnityEngine.UI;
 public class EqualPiece : MonoBehaviour
 {
     public bool EqualF;    //両面が同じかどうか見る
+    [SerializeField] ReversScript revercescript;
+
+    Button EqualButton;
 
     // Start is called before the first frame update
     void Start()
     {
         EqualF = false;
+        EqualButton = GetComponent<Button>();;
     }
 
     // Update is called once per frame
     void Update()
     {
-        if (EqualF)
+        if (ReversScript.WhoTurn == "Black")
         {
-            GetComponent<Image>().color = new Color(0.2f,0.2f,0.2f);
+            if (!revercescript.MyEqualPieceF)
+            {
+                EqualButton.interactable = true;
+                if (EqualF)
+                {
+                    GetComponent<Image>().color = new Color(0.2f, 1f, 1f);
+                }
+                else
+                {
+                    GetComponent<Image>().color = new Color(1, 1, 1);
+                }
+            }
+            else
+            {
+                EqualButton.interactable = false;
+            }
         }
-        else
+        else if(ReversScript.WhoTurn == "White")
         {
-            GetComponent<Image>().color = new Color(1,1,1);
+            if (!revercescript.EnemyEqualPieceF)
+            {
+                EqualButton.interactable = true;
+                if (EqualF)
+                {
+                    GetComponent<Image>().color = new Color(0.2f, 1f, 1f);
+                }
+                else
+                {
+                    GetComponent<Image>().color = new Color(1, 1, 1);
+                }
+            }
+            else
+            {
+                EqualButton.interactable = false;
+            }
         }
     }
 
@@ -32,5 +66,11 @@ public class EqualPiece : MonoBehaviour
     public void ButtonPush()
     {
         EqualF = !EqualF;
+        if(ReversScript.WhoTurn == "Black")
+        {
+        }
+        else if(ReversScript.WhoTurn == "White")
+        {
+        }
     }
 }

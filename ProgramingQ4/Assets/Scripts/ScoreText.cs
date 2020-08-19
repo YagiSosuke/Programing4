@@ -7,9 +7,9 @@ using UnityEngine.UI;
 
 public class ScoreText : MonoBehaviour
 {
-    int turnNum;    //残りターン数を示す
-    int bsNum;  //黒の点数
-    int wsNum;  //白の点数
+    public int turnNum;    //残りターン数を示す
+    public int bsNum;  //黒の点数
+    public int wsNum;  //白の点数
 
     [SerializeField] Text Turn;    //残り手数
     [SerializeField] Text BlackScore;    //黒の得点
@@ -18,7 +18,7 @@ public class ScoreText : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-
+        turnNum = -1;
     }
 
     // Update is called once per frame

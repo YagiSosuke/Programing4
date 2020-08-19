@@ -34,6 +34,9 @@ public class ReversScript : MonoBehaviour
 
     [SerializeField] EqualPiece equalpiece;         //両面同じ駒を格納してあるスクリプト
 
+    public bool MyEqualPieceF;      //自分が両面同じピースを使ったか？
+    public bool EnemyEqualPieceF;   //相手が両面同じピースを使ったか？
+
     // Start is called before the first frame update
     void Start()
     {
@@ -84,6 +87,10 @@ public class ReversScript : MonoBehaviour
         EnemyColorC = Color.white;
 
         PassF = false;      //基本、パスはできない
+
+        MyEqualPieceF = false;
+        EnemyEqualPieceF = false;
+
 
     Debug.Log("表示します\n"+
             ReversScript.map[0, 0].ToString() + ReversScript.map[1, 0].ToString() + ReversScript.map[2, 0].ToString() + ReversScript.map[3, 0].ToString() + ReversScript.map[4, 0].ToString() + ReversScript.map[5, 0].ToString() + ReversScript.map[6, 0].ToString() + ReversScript.map[7, 0].ToString() + "\n" +

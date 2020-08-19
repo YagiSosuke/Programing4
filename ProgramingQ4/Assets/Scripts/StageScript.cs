@@ -11,7 +11,8 @@ public class StageScript : MonoBehaviour
     public int map_y;   //yマス目はいくつか
 
     public GameObject ParentObject;     //親となるオブジェクト
-    public GameObject PieceObject;        //コマのオブジェクト
+    public
+        GameObject PieceObject;        //コマのオブジェクト
     public Image PieceImage;       //コマのイメージ
     [SerializeField] GameObject MarkObject;        //マークのオブジェクト
 
@@ -27,6 +28,8 @@ public class StageScript : MonoBehaviour
 
     //両面同じ駒のフラグ
     EqualPiece equalpiece;
+
+    ReversScript revercescript;
 
     void Start()
     {
@@ -52,6 +55,8 @@ public class StageScript : MonoBehaviour
         MarkObject.SetActive(false);
 
         equalpiece = GameObject.Find("EqualButton").GetComponent<EqualPiece>();
+
+        revercescript = GameObject.Find("Main Camera").GetComponent<ReversScript>();
     }
     void Update()
     {
@@ -107,10 +112,17 @@ public class StageScript : MonoBehaviour
             else
             {
                 ReversScript.map[map_x, map_y] = ReversScript.MyColor2;     //座標系を更新する
+                if(ReversScript.WhoTurn == "Black")
+                {
+                    revercescript.MyEqualPieceF = true;
+                }
+                else if(ReversScript.WhoTurn == "White")
+                {
+                    revercescript.EnemyEqualPieceF = true;
+                }
             }
             ReversScript.TurnOver(map_x, map_y);    //コマをひっくり返す
             ReversScript.TurnEndF = true;           //ターンエンド
-            Debug.Log("ターンエンド" + ReversScript.MyColor);
 
         }
     }

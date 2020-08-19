@@ -6,14 +6,19 @@ using UnityEngine.UI;
 /*AIのスクリプト*/
 //パスも実装
 
+    //左上変わらないときがある
+    //白が置いてくれないことがある
+
 public class AISYSTEM : MonoBehaviour
 {
     public static bool VSAI_F = false;       //AIと戦うかどうかのスクリプト
+    int count = 0;
 
     int[,] mapAI = new int[8,8];          //AIが手を読む用のマップ
     int[,] mapAITemp = new int[8, 8];          //AIが手を読む用のマップ
 
     bool[,] CheckF = new bool[8,8];            //ひっくり返せるかどうかのフラグ
+    bool[,] CheckFene = new bool[8, 8];            //ひっくり返せるかどうかのフラグ(敵)
 
     int[,] Scoremap = { { 30, -12, 0, -1, -1, 0, -12, 30 },
                         { -12, -15, -3, -3, -3, -3, -15, -12 },
@@ -45,17 +50,35 @@ public class AISYSTEM : MonoBehaviour
                 CheckF[i, j] = false;
             }
         }
+        Shindo = 0;
     }
 
     // Update is called once per frame
     void Update()
-    {
+    {        
+        if(VSAI_F == true)
+        {
+            //敵のターンの時
+            if (ReversScript.WhoTurn == "White")
+            {
+                if (count > 50)
+                {
+                    Debug.Log("num" + Shindo);
+                    MapReading(Shindo);
+                    count = 0;
+                }
+                else{
+                    count++;
+                }
+            }
+        }
         
     }
 
     //AIがマップを読む
     void MapReading(int num)
     {
+        Debug.Log("読みます");
         //最初、お互いの点数は0
         myScore = 0;
         enemyScore = 0;
@@ -69,6 +92,8 @@ public class AISYSTEM : MonoBehaviour
             }
         }
 
+
+        
 
         //点数をつけて一番いいところを探索
         HighScore_Num = -999;
@@ -84,16 +109,22 @@ public class AISYSTEM : MonoBehaviour
         //実際にひっくり返す
 
         //置く
-        reversscript.MapObject[HighScore_x,HighScore_y].GetComponent<StageScript>().PieceObject.SetActive(true);            //コマを配置する
-        ReversScript.map[HighScore_x, HighScore_y] = 2;     //両面別の駒を配置
+        if (CheckF[HighScore_x, HighScore_y])
+        {
+            reversscript.MapObject[HighScore_x, HighScore_y].GetComponent<StageScript>().PieceObject.SetActive(true);            //コマを配置する
+            ReversScript.map[HighScore_x, HighScore_y] = 2;     //両面別の駒を配置
 
-        //ひっくり返す
-        ReversScript.TurnOver(HighScore_x, HighScore_y);
+            //ひっくり返す
+            ReversScript.TurnOver(HighScore_x, HighScore_y);
+        }
+        ReversScript.TurnEndF = true;           //ターンエンド
+        
+        Debug.Log("最適マスは(" + HighScore_x + "," + HighScore_y+")");
     }
 
 
     //駒が置けるかチェック
-     public void CheckMap(int[,] AImap, int x, int y, int my, int my2, int ene, int ene2)
+     public void CheckMap(int[,] AImap, bool[,] Check, int x, int y, int my, int my2, int ene, int ene2)
     {
         //マスが空の時のみ見る
         if (AImap[x, y] == 0)
@@ -112,7 +143,7 @@ public class AISYSTEM : MonoBehaviour
                     //黒の場合
                     else if (AImap[x, i] == my || AImap[x, i] == my2)
                     {
-                        CheckF[x,y] = true;      //ここにはコマが置けるのでtrue
+                        Check[x,y] = true;      //ここにはコマが置けるのでtrue
                         break;
                     }
                     //白の場合は進展なし
@@ -129,7 +160,7 @@ public class AISYSTEM : MonoBehaviour
             for (int i = y + 2; i < 8; i++)
             {
                 //置かれる判定がされていない場合
-                if (!CheckF[x,y])
+                if (!Check[x,y])
                 {
                     //隣が白の時
                     if (AImap[x, y + 1] == ene || AImap[x, y + 1] == ene2)
@@ -142,7 +173,7 @@ public class AISYSTEM : MonoBehaviour
                         //黒の場合
                         else if (AImap[x, i] == my || AImap[x, i] == my2)
                         {
-                            CheckF[x,y] = true;      //ここにはコマが置けるのでtrue
+                            Check[x,y] = true;      //ここにはコマが置けるのでtrue
                             break;
                         }
                         //白の場合は進展なし
@@ -156,7 +187,7 @@ public class AISYSTEM : MonoBehaviour
             for (int i = x - 2; i >= 0; i--)
             {
                 //置かれる判定がされていない場合
-                if (!CheckF[x,y])
+                if (!Check[x,y])
                 {
                     //隣が白の時
                     if (AImap[x - 1, y] == ene || AImap[x - 1, y] == ene2)
@@ -169,7 +200,7 @@ public class AISYSTEM : MonoBehaviour
                         //黒の場合
                         else if (AImap[i, y] == my || AImap[i, y] == my2)
                         {
-                            CheckF[x,y] = true;      //ここにはコマが置けるのでtrue
+                            Check[x,y] = true;      //ここにはコマが置けるのでtrue
                             break;
                         }
                         //白の場合は進展なし
@@ -185,7 +216,7 @@ public class AISYSTEM : MonoBehaviour
                 if (AImap[x, y] == 0)
                 {
                     //置かれる判定がされていない場合
-                    if (!CheckF[x,y])
+                    if (!Check[x,y])
                     {
                         //隣が白の時
                         if (AImap[x + 1, y] == ene || AImap[x + 1, y] == ene2)
@@ -198,7 +229,7 @@ public class AISYSTEM : MonoBehaviour
                             //黒の場合
                             else if (AImap[i, y] == my || AImap[i, y] == my2)
                             {
-                                CheckF[x,y] = true;      //ここにはコマが置けるのでtrue
+                                Check[x,y] = true;      //ここにはコマが置けるのでtrue
                                 break;
                             }
                             //白の場合は進展なし
@@ -216,7 +247,7 @@ public class AISYSTEM : MonoBehaviour
                 if (AImap[x, y] == 0 && x+i < 8 && y-i >= 0)
                 {
                     //置かれる判定がされていない場合
-                    if (!CheckF[x,y])
+                    if (!Check[x,y])
                     {
                         //隣が白の時
                         if (AImap[x + 1, y - 1] == ene || AImap[x + 1, y - 1] == ene2)
@@ -229,7 +260,7 @@ public class AISYSTEM : MonoBehaviour
                             //黒の場合
                             else if (AImap[x + i, y - i] == my || AImap[x + i, y - i] == my2)
                             {
-                                CheckF[x,y] = true;      //ここにはコマが置けるのでtrue
+                                Check[x,y] = true;      //ここにはコマが置けるのでtrue
                                 break;
                             }
                             //白の場合は進展なし
@@ -246,7 +277,7 @@ public class AISYSTEM : MonoBehaviour
                 if (AImap[x, y] == 0 && x + i < 8 && y + i < 8)
                 {
                     //置かれる判定がされていない場合
-                    if (!CheckF[x,y])
+                    if (!Check[x,y])
                     {
                         //隣が白の時
                         if (AImap[x + 1, y +1] == ene || AImap[x + 1, y + 1] == ene2)
@@ -259,7 +290,7 @@ public class AISYSTEM : MonoBehaviour
                             //黒の場合
                             else if (AImap[x + i, y + i] == my || AImap[x + i, y + i] == my2)
                             {
-                                CheckF[x,y] = true;      //ここにはコマが置けるのでtrue
+                                Check[x,y] = true;      //ここにはコマが置けるのでtrue
                                 break;
                             }
                             //白の場合は進展なし
@@ -276,7 +307,7 @@ public class AISYSTEM : MonoBehaviour
                 if (AImap[x, y] == 0 && x - i >= 0 && y + i < 8)
                 {
                     //置かれる判定がされていない場合
-                    if (!CheckF[x,y])
+                    if (!Check[x,y])
                     {
                         //隣が白の時
                         if (AImap[x - 1, y + 1] == ene || AImap[x - 1, y + 1] == ene2)
@@ -289,7 +320,7 @@ public class AISYSTEM : MonoBehaviour
                             //黒の場合
                             else if (AImap[x - i, y + i] == my || AImap[x - i, y + i] == my2)
                             {
-                                CheckF[x,y] = true;      //ここにはコマが置けるのでtrue
+                                Check[x,y] = true;      //ここにはコマが置けるのでtrue
                                 break;
                             }
                             //白の場合は進展なし
@@ -307,7 +338,7 @@ public class AISYSTEM : MonoBehaviour
                 if (AImap[x, y] == 0 && x - i >= 0 && y - i >= 0)
                 {
                     //置かれる判定がされていない場合
-                    if (!CheckF[x,y])
+                    if (!Check[x,y])
                     {
                         //隣が白の時
                         if (AImap[x - 1, y - 1] == ene || AImap[x - 1, y - 1] == ene2)
@@ -320,7 +351,7 @@ public class AISYSTEM : MonoBehaviour
                             //黒の場合
                             else if (AImap[x - i, y - i] == my || AImap[x - i, y - i] == my2)
                             {
-                                CheckF[x,y] = true;      //ここにはコマが置けるのでtrue
+                                Check[x,y] = true;      //ここにはコマが置けるのでtrue
                                 break;
                             }
                             //白の場合は進展なし
@@ -368,7 +399,7 @@ public class AISYSTEM : MonoBehaviour
             //隣がひっくり返せるならひっくり返す
             if (AImap[x, y - 1] == ene)
             {
-                AImap[x, y - 1] = ene;
+                AImap[x, y - 1] = my;
             }
             //自分の色が現れるまでひっくり返す
             for (int i = y - 2; i >= 0; i--)
@@ -765,23 +796,98 @@ public class AISYSTEM : MonoBehaviour
         }
     }
 
+    //空いているマス数を検索
+    public int BlankMap(bool[,] map)
+    {
+        int num = 0;
+
+        for(int i = 0; i < 8; i++)
+        {
+            for(int j = 0; j < 8; j++)
+            {
+                if(map[i,j] == true)
+                {
+                    num++;
+                }
+            }
+        }
+
+        return num;
+    }
+
+    public void DebugMap(int[,] map)
+    {
+
+        Debug.Log("表示します\n" +
+                   map[0, 0] + map[1, 0] + map[2, 0] + map[3, 0] + map[4, 0] + map[5, 0] + map[6, 0] + map[7, 0] + "\n" +
+                   map[0, 1] + map[1, 1] + map[2, 1] + map[3, 1] + map[4, 1] + map[5, 1] + map[6, 1] + map[7, 1] + "\n" +
+                   map[0, 2] + map[1, 2] + map[2, 2] + map[3, 2] + map[4, 2] + map[5, 2] + map[6, 2] + map[7, 2] + "\n" +
+                   map[0, 3] + map[1, 3] + map[2, 3] + map[3, 3] + map[4, 3] + map[5, 3] + map[6, 3] + map[7, 3] + "\n" +
+                   map[0, 4] + map[1, 4] + map[2, 4] + map[3, 4] + map[4, 4] + map[5, 4] + map[6, 4] + map[7, 4] + "\n" +
+                   map[0, 5] + map[1, 5] + map[2, 5] + map[3, 5] + map[4, 5] + map[5, 5] + map[6, 5] + map[7, 5] + "\n" +
+                   map[0, 6] + map[1, 6] + map[2, 6] + map[3, 6] + map[4, 6] + map[5, 6] + map[6, 6] + map[7, 6] + "\n" +
+                   map[0, 7] + map[1, 7] + map[2, 7] + map[3, 7] + map[4, 7] + map[5, 7] + map[6, 7] + map[7, 7]
+                   );
+    }
+
+    public void DebugCheck(bool[,] map1)
+    {
+        int[,] map = new int[8, 8];
+
+        for (int i = 0; i < 8; i++)
+        {
+            for (int j = 0; j < 8; j++)
+            {
+                if (map1[i, j])
+                    map[i, j] = 1;
+                else
+                    map[i, j] = 0;
+            }
+        }
+
+
+        Debug.Log("確認した様子を表示します\n" +
+                   map[0, 0] + map[1, 0] + map[2, 0] + map[3, 0] + map[4, 0] + map[5, 0] + map[6, 0] + map[7, 0] + "\n" +
+                   map[0, 1] + map[1, 1] + map[2, 1] + map[3, 1] + map[4, 1] + map[5, 1] + map[6, 1] + map[7, 1] + "\n" +
+                   map[0, 2] + map[1, 2] + map[2, 2] + map[3, 2] + map[4, 2] + map[5, 2] + map[6, 2] + map[7, 2] + "\n" +
+                   map[0, 3] + map[1, 3] + map[2, 3] + map[3, 3] + map[4, 3] + map[5, 3] + map[6, 3] + map[7, 3] + "\n" +
+                   map[0, 4] + map[1, 4] + map[2, 4] + map[3, 4] + map[4, 4] + map[5, 4] + map[6, 4] + map[7, 4] + "\n" +
+                   map[0, 5] + map[1, 5] + map[2, 5] + map[3, 5] + map[4, 5] + map[5, 5] + map[6, 5] + map[7, 5] + "\n" +
+                   map[0, 6] + map[1, 6] + map[2, 6] + map[3, 6] + map[4, 6] + map[5, 6] + map[6, 6] + map[7, 6] + "\n" +
+                   map[0, 7] + map[1, 7] + map[2, 7] + map[3, 7] + map[4, 7] + map[5, 7] + map[6, 7] + map[7, 7]
+                   );
+    }
+
+
     //再帰するAIの先読み
     //繰り返し数を引数にする
+    //こいつがエラー
     void SerchInner(int Num, int score, int[,] map)
     {
+
+        Debug.Log(Num + "回目");
         //2こマップを用意する必要あり？
         int[,] mapAITemp2 = new int[8, 8];
         int[,] mapAITemp3 = new int[8, 8];
+
+        int my_score = 0;   //自分のスコア
+
+        int enemySccore = -999;     //敵スコア
+        int enemy_x = 0;
+        int enemy_y = 0;
 
         //ひっくり返せる場所を検索
         for (int i = 0; i < 8; i++)
         {
             for (int j = 0; j < 8; j++)
             {
-                CheckMap(map, i, j, 2, 4, 1, 3);
+                CheckF[i, j] = false;
+                CheckMap(map, CheckF, i, j, 2, 4, 1, 3);
             }
         }
-        
+
+
+        //自分のひっくり返すところを検索
         for (int i = 0; i < 8; i++)
         {
             for (int j = 0; j < 8; j++)
@@ -799,65 +905,93 @@ public class AISYSTEM : MonoBehaviour
                 //置ける場所なら
                 if (CheckF[i, j])
                 {
+                    //スコアは0にしておく
+                    my_score = 0;
                     //ひっくり返す
+                    mapAITemp2[i, j] = 2;
                     TurnOver(mapAITemp2, i, j, 2, 4, 1, 3);
-                    score += Scoremap[i,j];
+                    my_score += Scoremap[i, j];
+
 
                     //相手の手も読む
+                    enemySccore = -999;
+                    Debug.Log("enemyScore = " + enemySccore);
                     //ひっくり返せる場所を検索
                     for (int p = 0; p < 8; p++)
                     {
                         for (int q = 0; q < 8; q++)
                         {
-                            CheckMap(mapAITemp2, p, q, 1, 3, 2, 4);
-                        }
-                    }
-                    
-                    for (int p = 0; p < 8; p++)
-                    {
-                        for (int q = 0; q < 8; q++)
-                        {
-                            //置ける場所なら
-                            if (CheckF[p, q])
+                            CheckFene[p, q] = false;
+                            CheckMap(mapAITemp2, CheckFene, p, q, 1, 3, 2, 4);
+                            //ひっくり返せる場合
+                            if (CheckFene[p, q])
                             {
-                                //マップの置き換えを行う
-                                for (int r = 0; r < 8; r++)
+                                if (Scoremap[p, q] > enemySccore)
                                 {
-                                    for (int s = 0; s < 8; s++)
-                                    {
-                                        mapAITemp3[r, s] = mapAITemp2[r, s];
-                                    }
-                                }
-
-                                //ひっくり返す
-                                TurnOver(mapAITemp3, p, q, 1, 3, 2, 4);
-                                score -= Scoremap[p, q];
-
-                                if (Num <= 0)
-                                {
-                                    SerchInner(Num-1, score, mapAITemp3);
-                                }
-                                else
-                                {
-                                    if(HighScore_Num < score)
-                                    {
-                                        HighScore_Num = score;
-                                        XYChangeF = true;                                                                                  
-                                    }
-                                }
-                                //最上層、最強座標を変える必要があるとき
-                                if(Num == Shindo && XYChangeF)
-                                {
-                                    HighScore_x = p;
-                                    HighScore_y = q;
-                                    XYChangeF = false;
+                                    enemySccore = Scoremap[p, q];     //差し替える
+                                    enemy_x = p;
+                                    enemy_y = q;
                                 }
                             }
                         }
                     }
 
+                    //マップの置き換えを行う
+                    for (int r = 0; r < 8; r++)
+                    {
+                        for (int s = 0; s < 8; s++)
+                        {
+                            mapAITemp3[r, s] = mapAITemp2[r, s];
+                        }
+                    }
 
-                }
+                    //ひっくり返す
+
+                    mapAITemp3[enemy_x, enemy_y] = 1;
+                    TurnOver(mapAITemp3, enemy_x, enemy_y, 1, 3, 2, 4);
+                    my_score -= Scoremap[enemy_x, enemy_y];
+
+
+                    Debug.Log("自分の番");
+                    DebugCheck(CheckF);
+                    DebugMap(mapAITemp2);
+
+                    Debug.Log("敵の番");
+                    DebugCheck(CheckFene);
+                    DebugMap(mapAITemp3);
+
+                    Debug.Log("仮位置  白は(" + i + "," + j + ") " + "黒は(" + enemy_x + "," + enemy_y + ")");
+
+
+                    //更に潜る場合
+                    //余ってるマス検索
+                    if (Num > 0 && BlankMap(CheckFene) != 0)
+                    {
+                        SerchInner(Num - 1, score + my_score, mapAITemp3);
+                    }
+                    else
+                    {
+                        if (HighScore_Num < score + my_score)
+                        {
+                            HighScore_Num = score + my_score;
+                            XYChangeF = true;
+                        }
+                    }
+                    //最上層、最強座標を変える必要があるとき
+                    if(Num == Shindo)
+                    {
+                        Debug.Log("最上層");
+                        Debug.Log("XYChangeF = "+XYChangeF);
+                        Debug.Log("HighScore_Num = " + HighScore_Num);
+                    }
+                    if (Num == Shindo && XYChangeF)
+                    {
+                        Debug.Log("白は(" + i + "," + j + ") " + "黒は(" + enemy_x + "," + enemy_y + ")");
+                        HighScore_x = i;
+                        HighScore_y = j;
+                        XYChangeF = false;
+                    }
+                }                
             }
         }
         //置ける場所がなければ探索を終える?
@@ -875,5 +1009,7 @@ public class AISYSTEM : MonoBehaviour
         //差分を計算
 
     }
-}
 
+
+
+}
